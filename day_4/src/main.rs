@@ -2,21 +2,32 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use array_tool::vec::Intersect;
+use std::ops::{Range};
+use std::cmp::{max, min};
 
 fn main() {
-    let mut count: i32 = 0;
-
     let lines = read_lines("./input.txt").unwrap();
+    let mut scratchcards_vec = Vec::<usize>::new();
     for line in lines.lines() {
         if let Ok(card_string) = line {
-            let card = Card::new(card_string);
-            count += card.get_points();
+            scratchcards_vec.push(Card::new(card_string).get_scratchcards());
         }
     }
-    println!("{}", count);
+
+    let mut copy_vec: Vec<usize> = vec![1; scratchcards_vec.len()];
+    for i in 0..copy_vec.len() {
+        let range = intersect(i+1..i+scratchcards_vec[i]+1, 0..copy_vec.len());
+        let current_value = copy_vec[i];
+        copy_vec[range].iter_mut().for_each(|x| *x += current_value);
+    }
+    println!("{}", copy_vec.iter().sum::<usize>());
 }
 
-#[derive(Debug)]
+fn intersect(range1: Range<usize>, range2: Range<usize>) -> Range<usize> {
+    max(range1.start, range2.start)..(min(range1.end, range2.end))
+}
+
+#[derive(Debug, Clone)]
 struct Pile {
     winning: Vec::<i32>,
     owned: Vec::<i32>,
@@ -27,25 +38,24 @@ impl Pile {
         if let [winning, owned] = &pile_string.split(" | ").collect::<Vec<&str>>() // ["w1", "w2", ...] " | " ["o1", "o2", ...]
                              .into_iter().map(|x| x.split_whitespace().map(|x| x.parse::<i32>().unwrap()).collect::<Vec<i32>>()) // [w1, w2, ...] [o1, o2, ...]
                              .collect::<Vec<Vec<i32>>>()[..] {
-
-                                 return Pile { winning: winning.to_vec(), owned: owned.to_vec() };
-                             } else {
-                                return Pile { winning: Vec::<i32>::new(), owned: Vec::<i32>::new() }
-                             }
+            return Pile {
+                winning: winning.to_vec(),
+                owned: owned.to_vec()
+            };
+        } else {
+            return Pile {
+                winning: Vec::<i32>::new(),
+                owned: Vec::<i32>::new()
+            };
+        }
     }
 
-    fn get_points(self) -> i32 {
-        let exponent = self.winning.intersect(self.owned).len();
-        if exponent == 0 {
-            0
-        } else {
-            i32::pow(2, (exponent - 1).try_into().unwrap())
-        }
-        
+    fn get_scratchcards(self) -> usize {
+        self.winning.intersect(self.owned).len()
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Card {
     _id: usize,
     pile: Pile,
@@ -62,8 +72,8 @@ impl Card {
         Card { _id, pile }
     }
 
-    fn get_points(self) -> i32 {
-        self.pile.get_points()
+    fn get_scratchcards(self) -> usize {
+        self.pile.get_scratchcards()
     }
 }
 
