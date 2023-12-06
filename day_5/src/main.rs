@@ -3,9 +3,9 @@ use std::fs;
 use std::collections::HashMap;
 
 fn main() {
-    let almanac_str = fs::read_to_string("example_input.txt").expect("Unable to read file");
+    let almanac_str = fs::read_to_string("input.txt").expect("Unable to read file");
     let almanac = Almanac::new(&almanac_str);
-    dbg!(almanac);
+    println!("{}", almanac.get_lowest_location());
 }
 
 #[derive(Debug)]
@@ -68,20 +68,15 @@ impl Almanac {
         })
     }
 
-    fn get_lowest_location(&self) -> u32 {
-        let mut locations = Vec::<u32>::new();
-        for seed in &self.seeds {
-            let soil = self.to_soil.get(&seed);
-            let fertilizer = self.to_fertilizer.get(&soil);
-            let water = self.to_water.get(&fertilizer);
-            let light = self.to_light.get(&water);
-            let temperature = self.to_temperature.get(&light);
-            let humidity = self.to_humidity.get(&temperature);
-            let location = self.to_location.get(&humidity);
-
-            locations.push(location);
-        }
-        
-        *locations.iter().min().unwrap()
+    fn get_lowest_location(self) -> u32 {
+        self.seeds.iter().map(
+            |x| self.to_location.get(
+                &self.to_humidity.get(
+                    &self.to_temperature.get(
+                        &self.to_light.get(
+                            &self.to_water.get(
+                                &self.to_fertilizer.get(
+                                    &self.to_soil.get(&x)))))))
+        ).min().unwrap()
     }
 }
