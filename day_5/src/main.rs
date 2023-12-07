@@ -1,6 +1,5 @@
 
 use std::fs;
-use std::collections::HashMap;
 
 fn main() {
     let almanac_str = fs::read_to_string("input.txt").expect("Unable to read file");
@@ -9,22 +8,38 @@ fn main() {
 }
 
 #[derive(Debug)]
+struct RangeTable {
+    destination_range_start: u32,
+    source_range_start: u32,
+    range_length: u32,
+}
+
+#[derive(Debug)]
 struct Table {
-    table: HashMap::<u32, u32>,
+    table: Vec<RangeTable>,
 }
 
 impl Table {
     fn new() -> Table {
-        Table {table: HashMap::<u32, u32>::new()}
+        Table {table: Vec::<RangeTable>::new()}
     }
 
-    fn insert(mut self, key: u32, value: u32) -> Table {
-        self.table.insert(key, value);
+    fn insert(mut self, destination_range_start: u32, source_range_start: u32, range_length: u32,) -> Table {
+        self.table.push(RangeTable {
+            destination_range_start,
+            source_range_start,
+            range_length,
+        });
         self
     }
 
-    fn get(&self, key: &u32) -> u32 {
-        *self.table.get(key).unwrap_or(key)
+    fn get(&self, key: u32) -> u32 {
+        for range_table in &self.table {
+            if range_table.source_range_start <= key && key < range_table.source_range_start + range_table.range_length {
+                return range_table.destination_range_start + (key - range_table.source_range_start);
+            }
+        }
+        key
     }
 }
 
@@ -59,24 +74,24 @@ impl Almanac {
     }
 
     fn get_hashmap_from_str(hashmap_str: &str) -> Table {
-        let ranges: Vec<&str> = hashmap_str.split(":\n").collect::<Vec<&str>>()[1].split('\n').collect::<Vec<&str>>();
-        ranges.iter().fold(Table::new(), |map_acc, range| {
+        let mut ranges: Vec<&str> = hashmap_str.split(":\n").collect::<Vec<&str>>()[1].split('\n').collect::<Vec<&str>>();
+        ranges.pop();
+        ranges.iter().fold(Table::new(), |table_acc, range| {
             if let [destination_range_start, source_range_start, range_length] = range.split(' ').map(|x| x.parse::<u32>().unwrap()).collect::<Vec<u32>>()[..] {
-                let relative_range = 0..range_length;
-                return relative_range.fold(map_acc, |map_acc2, offset| map_acc2.insert(source_range_start + offset, destination_range_start + offset));
-            } else {map_acc}
+                table_acc.insert(destination_range_start, source_range_start, range_length)
+            } else {table_acc}
         })
     }
 
     fn get_lowest_location(self) -> u32 {
         self.seeds.iter().map(
             |x| self.to_location.get(
-                &self.to_humidity.get(
-                    &self.to_temperature.get(
-                        &self.to_light.get(
-                            &self.to_water.get(
-                                &self.to_fertilizer.get(
-                                    &self.to_soil.get(&x)))))))
+                self.to_humidity.get(
+                    self.to_temperature.get(
+                        self.to_light.get(
+                            self.to_water.get(
+                                self.to_fertilizer.get(
+                                    self.to_soil.get(*x)))))))
         ).min().unwrap()
     }
 }
