@@ -8,8 +8,8 @@ fn main() {
 }
 
 struct Race {
-    time: u128,
-    distance: u128,
+    time: u64,
+    distance: u64,
 }
 
 impl Race {
@@ -21,8 +21,8 @@ impl Race {
                     .collect::<Vec<&str>>()[1..]
                     .iter()
                     .fold(String::new(), |a, b| a + b)
-                    .parse::<u128>().unwrap()
-                ).collect::<Vec<u128>>()[..] {
+                    .parse::<u64>().unwrap()
+                ).collect::<Vec<u64>>()[..] {
             Race {
                 time: *time,
                 distance: *distance,
@@ -35,7 +35,7 @@ impl Race {
         }
     }
 
-    fn get_count(&self) -> u128 {
+    fn get_count(&self) -> u64 {
         let mut i = 0;
         while i < self.time - 1 && self.distance > i * (self.time - i) {
             i += 1;
