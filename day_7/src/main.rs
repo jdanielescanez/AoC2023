@@ -53,7 +53,9 @@ impl Game {
     fn get_total_score(&self) -> u32 {
         let mut score = 0;
         for i in 0..self.players.len() {
-            score += (i as u32 + 1) * self.players[self.players.len() - 1 - i].bid;
+            let bid = self.players[self.players.len() - 1 - i].bid;
+            let rank = i as u32 + 1;
+            score += rank * bid;
         }
         score
     }
@@ -146,7 +148,8 @@ impl Card {
             '5' => Card::Five,
             '4' => Card::Four,
             '3' => Card::Three,
-            _ => Card::Two,
+            '2' => Card::Two,
+            _ => panic!("{} is not a valid card string", card_str),
         }
     }
 }
