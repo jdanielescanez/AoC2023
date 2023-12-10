@@ -24,17 +24,8 @@ fn change_string_by_number(input: String) -> String {
          .replace("seven", "seven7seven")
          .replace("eight", "eight8eight")
          .replace("nine", "nine9nine")
-    // input.chars()
-    // .map(|x| match x { 
-    //     '!' => '?', 
-    //     'A'..='Z' => 'X', 
-    //     'a'..='z' => 'x',
-    //     _ => x
-    // }).collect();
 }
 
-// The output is wrapped in a Result to allow matching on errors
-// Returns an Iterator to the Reader of the lines of the file.
 fn read_lines(filename: &str) -> io::Result<io::BufReader<File>> {
     let file = File::open(filename)?;
     Ok(io::BufReader::new(file))
