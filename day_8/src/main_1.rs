@@ -26,23 +26,18 @@ impl Journey {
     }
 
     fn run(&self) -> u32 {
-        let mut current_nodes = self.network.keys()
-            .filter(|x| x.chars().collect::<Vec<char>>()[2] == 'A')
-            .map(|x| x.clone())
-            .collect::<Vec<String>>();
+        let mut current_node = String::from("AAA");
         let mut counter: u32 = 0;
         loop {
             for instruction in self.instructions.chars() {
-                for i in 0..current_nodes.len() {
-                    current_nodes[i] = match instruction {
-                        'L' => self.network[&current_nodes[i]].0.clone(),
-                        'R' => self.network[&current_nodes[i]].1.clone(),
-                        _ => panic!("{} is not a valid instruction", current_nodes[i]),
-                    };
-                }
+                current_node = match instruction {
+                    'L' => self.network[&current_node].0.clone(),
+                    'R' => self.network[&current_node].1.clone(),
+                    _ => panic!("{} is not a valid instruction", current_node),
+                };
             }
             counter += self.instructions.len() as u32;
-            if current_nodes.iter().all(|x| x.chars().collect::<Vec<char>>()[2] == 'Z') {
+            if current_node == "ZZZ" {
                 break;
             }
         }
