@@ -2,13 +2,13 @@
 use std::fs;
 
 struct History {
-    data: Vec<i128>,
+    data: Vec<i64>,
     counter: u32,
 }
 
 impl History {
     fn new(data_str: &str) -> History {
-        let data: Vec<i128> = data_str.split(' ').map(|x| x.parse::<i128>().unwrap()).collect();
+        let data: Vec<i64> = data_str.split(' ').map(|x| x.parse::<i64>().unwrap()).collect();
         
         History {
             data,
@@ -25,29 +25,32 @@ impl History {
         self.data = data_aux
     }
 
-    fn factorial(num: i128) -> i128 {
+    fn factorial(num: i64) -> i64 {
         (1..=num).product()
     }
 
-    fn get_function(&self) -> i128 {
-        let mut function = vec![0; self.data.len()];
-        for n in 1..=function.len() {
-            dbg!(n);
-            for i in 1..n {
-                function[n - 1] += (self.data[n - 1] - function[i]) / Self::factorial((n - 1) as i128);
-                dbg!(&function, n - 1);
+    fn get_function(&self) -> f64 {
+        let mut function = vec![0_f64; self.data.len()];
+        function[0] = self.data[0] as f64;
+        for n in 1..function.len() {
+            println!("It n = {}", n);
+            for i in 0..n {
+                println!("i = {}", i);
+                function[n] += - (1..=i).fold(1, |acc, j| acc * (n - j + 1) as i64) as f64 * function[i];
             }
+            function[n] += self.data[n] as f64;
+            function[n] /= Self::factorial(n as i64) as f64;
+            dbg!(&function);
         }
-        function.iter().enumerate().map(|(index, element)| element * (Self::factorial((function.len() - index) as i128))).sum()
+        function.iter().enumerate().fold(0.0, |sum, (i, element)| sum as f64 + element * (1..=i).fold(1, |prod, j| prod * (function.len() - j + 1) as i64) as f64)
     }
-
 }
 
 fn main() {
     let file_str = fs::read_to_string("example_input.txt")
         .expect("Unable to read file");
     let lines_vec: Vec<&str> = file_str.split('\n').collect::<Vec<&str>>();
-    let history = History::new(lines_vec[..lines_vec.len()-1].to_vec()[0]);
+    let history = History::new(lines_vec[..lines_vec.len()-1].to_vec()[1]);
 
     println!("{}", history.get_function());
 }
