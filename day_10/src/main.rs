@@ -72,11 +72,11 @@ impl Square {
     }
 
     fn get_posible_next_position(&self, i: usize, j: usize) -> Position {
-        if i > 0 && vec![Tile::HorizontalPipe, Tile::NorthWestBend, Tile::SouthWestBend].contains(&self.data[i - 1][j]) {
+        if i > 0 && vec![Tile::VerticalPipe, Tile::SouthEastBend, Tile::SouthWestBend].contains(&self.data[i - 1][j]) {
             (i as i32 - 1, j as i32)
-        } else if j > 0 && vec![Tile::VerticalPipe, Tile::SouthEastBend, Tile::SouthWestBend].contains(&self.data[i][j - 1]) {
+        } else if j > 0 && vec![Tile::HorizontalPipe, Tile::NorthWestBend, Tile::SouthWestBend].contains(&self.data[i][j - 1]) {
             (i as i32, j as i32 - 1)
-        } else if i < &self.data.len() - 1 && vec![Tile::HorizontalPipe, Tile::NorthEastBend, Tile::SouthEastBend].contains(&self.data[i + 1][j]) {
+        } else if i < &self.data.len() - 1 && vec![Tile::VerticalPipe, Tile::NorthEastBend, Tile::NorthWestBend].contains(&self.data[i + 1][j]) {
             (i as i32 + 1, j as i32)
         } else {
             (i as i32, j as i32 + 1)
