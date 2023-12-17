@@ -1,8 +1,7 @@
 
 use std::fs;
-use std::collections::HashSet;
 
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug)]
 enum Tile {
     VerticalPipe,
     HorizontalPipe,
@@ -84,47 +83,21 @@ impl Square {
         }
     }
 
-    fn get_hashset_path(&self) -> HashSet<Position> {
-        let mut hashset_path = HashSet::<Position>::new();
+    fn get_steps_to_farthest_point(&self) -> usize {
         let start_i = self.data.iter().position(|row| row.iter().any(|tile| tile == &Tile::Start)).unwrap();
         let start_j = self.data[start_i].iter().position(|tile| tile == &Tile::Start).unwrap();
         let start_position = (start_i as i32, start_j as i32);
 
-        let mut prev_position = start_position;
         let mut curr_position = self.get_posible_next_position(start_i, start_j);
-        hashset_path.insert(start_position);
-        hashset_path.insert(curr_position);
+        let mut prev_position = start_position;
+        let mut counter: usize = 1;
         while curr_position != start_position {
             let next_position = self.get_next_position(prev_position, curr_position);
             prev_position = curr_position;
             curr_position = next_position;
-            hashset_path.insert(curr_position);
+            counter += 1;
         }
-        hashset_path
-    }
-
-    fn get_enclosed_ground_tiles(&self) -> u32 {
-        let hashset_path = self.get_hashset_path();
-        self.data
-            .iter()
-            .enumerate()
-            .map(|(i, line)|
-                line.iter()
-                    .enumerate()
-                    .filter(|(j, _)| !hashset_path.contains(&(i as i32, *j as i32)))
-                    .fold(0, |acc, (j, _)| {
-                        acc + &line[..j]
-                            .to_vec()
-                            .iter_mut()
-                            .enumerate()
-                            .fold(0, |acc2, (j2, tile2)|
-                                (acc2 + ([Tile::VerticalPipe, Tile::NorthEastBend, Tile::NorthWestBend].contains(tile2) &&
-                                        hashset_path.contains(&(i as i32, j2 as i32))) as u32) % 2
-                            )
-                        }
-                    )
-            )
-            .fold(0, |acc3, elem| acc3 + elem)
+        counter / 2
     }
 }
 
@@ -134,6 +107,6 @@ fn main() {
     let mut square_vec_str: Vec<&str> = file_str.split('\n').collect::<Vec<&str>>();
     square_vec_str = square_vec_str[..square_vec_str.len()-1].to_vec();
     let square = Square::new(&square_vec_str);
-    let result = square.get_enclosed_ground_tiles();
+    let result = square.get_steps_to_farthest_point();
     println!("{}", result);
 }
